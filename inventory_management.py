@@ -19,6 +19,8 @@
 import sqlite3
 import pandas as pd
 
+
+
 #Show all products list
 def all_products_list():
    cursor.execute("SELECT * FROM my_table ORDER BY date DESC")
@@ -114,6 +116,27 @@ cursor = conn.cursor()
 x = 1
 print("Opened database successfully")
 
+# Get storage location of all items
+GET_STORAGE_LOCATION = "SELECT storage_location FROM my_table;"
+def get_storage_location(conn):
+   with conn:
+      cursor = conn.execute(GET_STORAGE_LOCATION).fetchall()
+      for row in cursor:
+         print(row)
+
+get_storage_location(conn)
+
+"""This function is useful for creating graphs and analyzing data, 
+since it gets all instances of an item
+The LIMIT clause can be used to constrain the number of rows returned"""
+def get_all_item_instances():
+   my_cursor =  conn.execute("SELECT item_name, Date FROM my_table WHERE id = 1 LIMIT 5")
+
+   rows = my_cursor.fetchall()
+   for x in rows:
+      print(x)
+
+get_all_item_instances()
 
 
 while(x):
