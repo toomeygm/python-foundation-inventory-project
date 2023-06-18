@@ -16,19 +16,122 @@
     #print(row)
 
 
-import pandas as pd
 import sqlite3
+import pandas as pd
 
-# Connetct Database
+#Show all products list
+def all_products_list():
+   cursor.execute("SELECT * FROM my_table ORDER BY date DESC")
+
+  # Fetch all the rows from the result
+   rows = cursor.fetchall()
+
+   # Print the products in the inventory
+   for row in rows:
+      print("ID:", row[0])
+      print("Item Name:", row[1])
+      print("Quantity:", row[2])
+      print("Purchase Location:", row[3])
+      print("Storage Location:", row[4])
+      print("Date:", row[5])
+      print("-----------------------")
+
+
+#Show products list by date
+def list_by_date():
+   # Specify the desired date
+   date = input("Enter the date (YYYY/MM/DD): ")
+
+   # Execute the SELECT query with the WHERE clause
+   cursor.execute("SELECT * FROM my_table WHERE date = ?", (date,))
+
+   # Fetch all the rows from the result
+   rows = cursor.fetchall()
+
+   # Print the products in the inventory for the specified date
+   if rows:
+      for row in rows:
+         print("ID:", row[0])
+         print("Item Name:", row[1])
+         print("Quantity:", row[2])
+         print("Purchase Location:", row[3])
+         print("Storage Location:", row[4])
+         print("Date:", row[5])
+         print("-----------------------")
+   else:
+      print("No data exists for this date.")
+
+
+def insert_new_data():
+   id = input("Enter the id of item: ")
+   item_name = input("Enter the name of new item: ")
+   quantity = input("Enter the quantity of the item: ")
+   purchase_location = input("Enter the name of the place where you purchased the item: ")
+   storage_location = input("Enter the location where you want to store your items: ")
+   date = input("Enter the date in YYYY/MM/DD format: " )
+   try:
+      conn.execute("INSERT INTO my_table (id,item_name,quantity,purchase_location,storage_location,date)\
+                   values ("+"'" +str(id) +"','"+ str(item_name) +"','" + str(quantity) + "', '" +str(purchase_location) +"', '" +str(storage_location) +"', '" +str(date) +"')");
+      conn.commit()
+      print("Data inserted successfully")
+   except Exception as e:
+      print(e)
+      pass
+
+
+
+def delete_data():
+      item_name = input("Enter the name of the item that you want to delete: ")
+
+      # Search for items in the database
+      cursor.execute("SELECT * FROM my_table WHERE item_name=?", (item_name,))
+      result = cursor.fetchone()  # bring the result
+
+      if result:
+         # if the item exists
+         item_id = result[0]
+         cursor.execute("DELETE FROM my_table WHERE id=?", (item_id,))
+         conn.commit()
+         print(f"Item '{item_name}' is deleted.")
+      else:
+         # if the item doesn't exist
+         print(f"Item '{item_name}' does not exist in your inventory.")
+
+         # Ask users to search again
+         choice = input("Do you want to search for the item again? (y/n): ")
+         if choice.lower() == "y":
+            delete_data()
+
+#def update_data():
+#def purchase_list():
+
+
+
+# Connect Database
 conn = sqlite3.connect('inventory.db')
-print ("Opened database successfully")
+cursor = conn.cursor()
 
-#Check Database works
-cursor = conn.execute("SELECT id, item_name, quantity from my_table")
-for row in cursor:
-   print ("ID = ", row[0])
-   print ("ITEM_NAME = ", row[1])
-   print ("QUANTITY = ", row[2]), "\n"
+x = 1
+print("Opened database successfully")
 
-print ("Operation done successfully")
-conn.close()
+
+
+while(x):
+   print("Press 1 to show all products in inventory")
+   print("Press 2 to show products list by date")
+   print("Press 3 to insert new item")
+   print("Press 4 to delete the data")
+
+   name = input("Choose an Operation to perform ")
+   if(name == "1"):
+      all_products_list()
+   elif(name =="2"):
+      list_by_date()
+   elif(name =="3"):
+      insert_new_data()
+   elif(name =="4"):
+      delete_data()
+
+      conn.close()
+      x = 0
+
