@@ -19,38 +19,51 @@
 import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
+import tkinter as tk
 
-conn = sqlite3.connect(inventory.db)
+#intialize app
+root = tk.Tk()
+root.title("Stocktaker")
+#root.eval("tk::PlaceWindow . center")
+x = root.winfo_screenwidth() // 2
+y = int(root.winfo_screenwidth() * 0.1)
+root.geometry("500x500+" + str(x) + "+" + str(y))
 
-fig = plt.figure()
-axes = fig.add_subplot(1,1,1)
-axes.bar([1,2,3,4], [3,5,7,25], tick_label = ["A", "B", "C", "D"])
-plt.show()
+
+box1 = tk.Frame(root, width=500, height=600, bg="#3d6466")
+box1.grid(row=0, column=0)
+
+#box1 widgets
+tk.Label()
+
+#to run app
+root.mainloop()
+
+conn = sqlite3.connect("inventory.db")
+
+
 
 #df["Date"] = df["Date"].strptime(' ')
 #GET_ITEM_BY_DATE = "SELECT id, Date FROM my_table GROUP BY id"
 
 
 
-select * from my_table
-left join item_table
-on item_table.item_id = my_table.item_id
-def get_all_item_instances_bar(id):
-   fig = plt.figure()
-   axes = fig.add_subplot(1, 1, 1)
-   axes.bar(
-      range(len(id)),
-      [id[1] for i in id]
-   )
-   plt.show()
-
-   cursor =  conn.execute("SELECT item_name, Date FROM my_table WHERE id = 1 LIMIT 5")
-
-   rows = cursor.fetchall()
-   for x in rows:
-      print(x)
-
-get_all_item_instances_bar()
+# def get_all_item_instances_bar(id):
+#    fig = plt.figure()
+#    axes = fig.add_subplot(1, 1, 1)
+#    axes.bar(
+#       range(len(id)),
+#       [id[1] for i in id]
+#    )
+#    plt.show()
+#
+#    cursor =  conn.execute("SELECT item_name, Date FROM my_table WHERE id = 1 LIMIT 5")
+#
+#    rows = cursor.fetchall()
+#    for x in rows:
+#       print(x)
+#
+# get_all_item_instances_bar(id)
 
 
 #fig = px.bar (df(my_table?), x = 'species'(item_name), y = 'location'(Date))
@@ -100,7 +113,7 @@ def list_by_date():
    else:
       print("No data exists for this date.")
 
-list_by_date()
+
 
 def insert_new_data():
    id = input("Enter the id of item: ")
@@ -158,7 +171,7 @@ print("Opened database successfully")
 GET_STORAGE_LOCATION = "SELECT storage_location FROM my_table;"
 def get_storage_location(conn):
    with conn:
-      cursor = conn.execute(GET_STORAGE_LOCATION).fetchall()
+      cursor = conn.execute(GET_STORAGE_LOCATION).fetchmany(5)
       for row in cursor:
          print(row)
 

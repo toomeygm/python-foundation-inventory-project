@@ -129,7 +129,7 @@ get_all_item_instances()
 print("*******************************")
 
 df = pd.read_sql_query("SELECT id, item_name, quantity, purchase_location, Date FROM my_table ORDER BY Date DESC", conn)
-df["Date"] = pd.to_datetime(df["Date"])
+#df["Date"] = pd.to_datetime(df["Date"])
 
 #Group products by location they were bought
 df.groupby("purchase_location")["item_name"].nunique().plot(kind="bar", color = "pink")

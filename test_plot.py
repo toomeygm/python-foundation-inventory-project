@@ -3,6 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+# fig = plt.figure()
+# axes = fig.add_subplot(1,1,1)
+# axes.bar([1,2,3,4], [3,5,7,25], tick_label = ["A", "B", "C", "D"])
+# plt.show()
 
 conn = sqlite3.connect("inventory.db")
 #df = pd.read_sql_query("SELECT item_name, quantity, Date FROM my_table WHERE id = 1", conn)
