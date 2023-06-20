@@ -1,23 +1,9 @@
-#import pandas as pd
-#import sqlite3
-
-#conn = sqlite3.connect("inventory.db")
-
-#conn.execute("""CREATE TABLE if not exists my_table (item_name TEXT PRIMARY KEY NOT NULL, quantity INT, purchase_location TEXT, storage_location TEXT);""")
-
-#print("Table created successfully")
-
-
-#populate_data = True
-
-#conn.close()
-
-#for row in conn.execute("select * from my_table"):
-    #print(row)
-
-
 import sqlite3
 import pandas as pd
+
+# Connect Database
+conn = sqlite3.connect('inventory.db')
+cursor = conn.cursor()
 
 
 
@@ -33,9 +19,11 @@ def all_products_list():
       print("ID:", row[0])
       print("Item Name:", row[1])
       print("Quantity:", row[2])
-      print("Purchase Location:", row[3])
-      print("Storage Location:", row[4])
-      print("Date:", row[5])
+      print("Minimum Stock Holdings:", row[3])
+      print("Minimum Quantity:", row[4])
+      print("Purchase Location:", row[5])
+      print("Storage Location:", row[6])
+      print("Date:", row[7])
       print("-----------------------")
 
 
@@ -56,9 +44,11 @@ def list_by_date():
          print("ID:", row[0])
          print("Item Name:", row[1])
          print("Quantity:", row[2])
-         print("Purchase Location:", row[3])
-         print("Storage Location:", row[4])
-         print("Date:", row[5])
+         print("Minimum Stock Holdings:", row[3])
+         print("Minimum Quantity:", row[4])
+         print("Purchase Location:", row[5])
+         print("Storage Location:", row[6])
+         print("Date:", row[7])
          print("-----------------------")
    else:
       print("No data exists for this date.")
@@ -68,14 +58,14 @@ def insert_new_data():
    id = input("Enter the id of item: ")
    item_name = input("Enter the name of new item: ")
    quantity = input("Enter the quantity of the item: ")
+   min_quantity = input("Enter the minimum quantity that should be stored: ")
    purchase_location = input("Enter the name of the place where you purchased the item: ")
    storage_location = input("Enter the location where you want to store your items: ")
    date = input("Enter the date in YYYY/MM/DD format: " )
    try:
-      conn.execute("INSERT INTO my_table (id,item_name,quantity,purchase_location,storage_location,date)\
-                   values ("+"'" +str(id) +"','"+ str(item_name) +"','" + str(quantity) + "', '" +str(purchase_location) +"', '" +str(storage_location) +"', '" +str(date) +"')");
+      conn.execute("INSERT INTO my_table (id,item_name,quantity,min_quantity,purchase_location,storage_location,date) VALUES(?,?,?,?,?,?,?)",(id,item_name,quantity,min_quantity,purchase_location,storage_location,date))
       conn.commit()
-      print("Data inserted successfully")
+      print("New data inserted successfully")
    except Exception as e:
       print(e)
       pass
@@ -104,39 +94,66 @@ def delete_data():
          if choice.lower() == "y":
             delete_data()
 
-#def update_data():
-#def purchase_list():
+
+def update_data():
+    # Get data from the most recent date
+    cursor.execute('SELECT * FROM my_table WHERE date = (SELECT MAX(date) FROM my_table)')
+    latest_data = cursor.fetchall()
+
+    if latest_data:
+        for data in latest_data:
+            id, item_name, quantity, min_quantity, purchase_location, storage_location, date = data
+            print(
+                f"ID: {id}, Name: {item_name}, Quantity: {quantity}, Minimum Quantity: {min_quantity}, Purchase location: {purchase_location}, Storage location: {storage_location}, Date: {date}")
+
+            # Get the changed information
+            new_quantity = input(f"New Quantity: ")
+            new_min_quantity = input(f"New Minimum Quantity (Press Enter, if there is no change): ")
+            new_purchase_location = input(f"New Purchase Location (Press Enter, if there is no change): ")
+            new_storage_location = input(f"New Storage Location (Press Enter, if there is no change): ")
+            new_date = input(f"New Date(in YYYY/MM/DD format): ")
+
+            if new_quantity:
+                quantity = int(new_quantity)
+            if new_min_quantity:
+                min_quantity = int(new_min_quantity)
+            if new_purchase_location:
+                purchase_location = new_purchase_location
+            if new_storage_location:
+                storage_location = new_storage_location
+            if new_date:
+                date = new_date
+
+            # Save as new data
+            cursor.execute(
+                "INSERT INTO my_table (id, item_name, quantity, min_quantity, purchase_location, storage_location, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (id, item_name, quantity, min_quantity, purchase_location, storage_location, date))
+
+            conn.commit()
+            print("New data updated successfully.")
+
+        cursor.execute(
+            "SELECT item_name, quantity, min_quantity FROM my_table WHERE date = (SELECT MAX(date) FROM my_table) AND quantity <= min_quantity")
+        low_quantity_items = cursor.fetchall()
+
+        # Show user a list of items they need to buy if their inventory is below the minimum stock level
+        if low_quantity_items:
+            print("The following items need to be purchased:")
+            for item in low_quantity_items:
+                item_name, quantity, min_quantity = item
+                print(f"- {item_name}: (Current Quantity: {quantity} / Minimum Stock Holdings: {min_quantity})")
+        else:
+            print("No items need to be purchased.")
 
 
+    else:
+        print("No data found.")
 
-# Connect Database
-conn = sqlite3.connect('inventory.db')
-cursor = conn.cursor()
+
 
 x = 1
 print("Opened database successfully")
 
-# Get storage location of all items
-GET_STORAGE_LOCATION = "SELECT storage_location FROM my_table;"
-def get_storage_location(conn):
-   with conn:
-      cursor = conn.execute(GET_STORAGE_LOCATION).fetchall()
-      for row in cursor:
-         print(row)
-
-get_storage_location(conn)
-
-"""This function is useful for creating graphs and analyzing data, 
-since it gets all instances of an item
-The LIMIT clause can be used to constrain the number of rows returned"""
-def get_all_item_instances():
-   my_cursor =  conn.execute("SELECT item_name, Date FROM my_table WHERE id = 1 LIMIT 5")
-
-   rows = my_cursor.fetchall()
-   for x in rows:
-      print(x)
-
-get_all_item_instances()
 
 
 while(x):
@@ -144,6 +161,7 @@ while(x):
    print("Press 2 to show products list by date")
    print("Press 3 to insert new item")
    print("Press 4 to delete the data")
+   print("press 5 to update data")
 
    name = input("Choose an Operation to perform ")
    if(name == "1"):
@@ -154,7 +172,9 @@ while(x):
       insert_new_data()
    elif(name =="4"):
       delete_data()
+   elif(name =="5"):
+      update_data()
 
-      conn.close()
-      x = 0
+conn.close()
+x = 0
 
