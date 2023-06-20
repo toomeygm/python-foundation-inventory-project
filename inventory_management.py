@@ -1,25 +1,9 @@
-#import pandas as pd
-#import sqlite3
-
-#conn = sqlite3.connect("inventory.db")
-
-#conn.execute("""CREATE TABLE if not exists my_table (item_name TEXT PRIMARY KEY NOT NULL, quantity INT, purchase_location TEXT, storage_location TEXT);""")
-
-#print("Table created successfully")
-
-
-#populate_data = True
-
-#conn.close()
-
-#for row in conn.execute("select * from my_table"):
-    #print(row)
-
-
 import sqlite3
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
-
+#FUNCTIONS
 
 #Show all products list
 def all_products_list():
@@ -108,7 +92,6 @@ def delete_data():
 #def purchase_list():
 
 
-
 # Connect Database
 conn = sqlite3.connect('inventory.db')
 cursor = conn.cursor()
@@ -120,7 +103,7 @@ print("Opened database successfully")
 GET_STORAGE_LOCATION = "SELECT storage_location FROM my_table;"
 def get_storage_location(conn):
    with conn:
-      cursor = conn.execute(GET_STORAGE_LOCATION).fetchall()
+      cursor = conn.execute(GET_STORAGE_LOCATION).fetchmany(10)
       for row in cursor:
          print(row)
 
@@ -130,14 +113,42 @@ get_storage_location(conn)
 since it gets all instances of an item
 The LIMIT clause can be used to constrain the number of rows returned"""
 def get_all_item_instances():
-   my_cursor =  conn.execute("SELECT item_name, Date FROM my_table WHERE id = 1 LIMIT 5")
+   cursor =  conn.execute("SELECT item_name, Date FROM my_table WHERE id = 1 LIMIT 5")
 
-   rows = my_cursor.fetchall()
+   rows = cursor.fetchall()
    for x in rows:
       print(x)
 
 get_all_item_instances()
 
+# VISUALIZING DATA USING MATPLOTLIB
+print("*******************************")
+
+#read db as df using SQL Alchemy, a Python SQL toolkit
+df = pd.read_sql_query("SELECT id, item_name, quantity, purchase_location, Date FROM my_table ORDER BY Date DESC", conn)
+df["Date"] = pd.to_datetime(df["Date"])
+
+#Group products by location they were bought
+df.groupby("purchase_location")["item_name"].nunique().plot(kind="bar", color = "pink")
+plt.ylabel("Item quantity")
+plt.xticks(rotation=45, ha='right')
+plt.show()
+
+# Visualization Consumption of product by month for item id 1 (Mehl Typ 405 25 kg)
+ypoints = np.array([40, 5, 30, 15, 30, 12, 30, 8, 30, 5, 30, 8, 35])
+plt.plot(ypoints, "o:m", ls = ":")
+plt.xlabel("Bi-monthly inventory from 01/12/2022 to 01/06/2023")
+plt.ylabel("Quantity of item (Flour Type 405 25 kg)")
+plt.show()
+
+ # Visualization Consumption of product by month for item id 5 (Butter (250g*20/box)
+ypoints = np.array([10, 2, 7, 5, 8, 5, 8, 5, 10, 3, 10, 5, 10])
+plt.plot(ypoints, "o:g", ls = ":")
+plt.xlabel("Bi-monthly inventory from 01/12/2022 to 01/06/2023")
+plt.ylabel("Quantity of item (Butter (250g*20/box)")
+plt.show()
+
+print("*************************")
 
 while(x):
    print("Press 1 to show all products in inventory")
