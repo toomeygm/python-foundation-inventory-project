@@ -1,10 +1,62 @@
+#import pandas as pd
+#import sqlite3
+
+#conn = sqlite3.connect("inventory.db")
+
+#conn.execute("""CREATE TABLE if not exists my_table (item_name TEXT PRIMARY KEY NOT NULL, quantity INT, purchase_location TEXT, storage_location TEXT);""")
+
+#print("Table created successfully")
+
+
+#populate_data = True
+
+#conn.close()
+
+#for row in conn.execute("select * from my_table"):
+    #print(row)
+
+
 import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
+
+conn = sqlite3.connect(inventory.db)
+
+fig = plt.figure()
+axes = fig.add_subplot(1,1,1)
+axes.bar([1,2,3,4], [3,5,7,25], tick_label = ["A", "B", "C", "D"])
+plt.show()
+
+#df["Date"] = df["Date"].strptime(' ')
+#GET_ITEM_BY_DATE = "SELECT id, Date FROM my_table GROUP BY id"
 
 
-#FUNCTIONS
+
+select * from my_table
+left join item_table
+on item_table.item_id = my_table.item_id
+def get_all_item_instances_bar(id):
+   fig = plt.figure()
+   axes = fig.add_subplot(1, 1, 1)
+   axes.bar(
+      range(len(id)),
+      [id[1] for i in id]
+   )
+   plt.show()
+
+   cursor =  conn.execute("SELECT item_name, Date FROM my_table WHERE id = 1 LIMIT 5")
+
+   rows = cursor.fetchall()
+   for x in rows:
+      print(x)
+
+get_all_item_instances_bar()
+
+
+#fig = px.bar (df(my_table?), x = 'species'(item_name), y = 'location'(Date))
+#fig.show() .....use as templated
+
+
 
 #Show all products list
 def all_products_list():
@@ -48,6 +100,7 @@ def list_by_date():
    else:
       print("No data exists for this date.")
 
+list_by_date()
 
 def insert_new_data():
    id = input("Enter the id of item: ")
@@ -93,6 +146,7 @@ def delete_data():
 #def purchase_list():
 
 
+
 # Connect Database
 conn = sqlite3.connect('inventory.db')
 cursor = conn.cursor()
@@ -101,13 +155,10 @@ x = 1
 print("Opened database successfully")
 
 # Get storage location of all items
-#fetchmany() – for returning a number of rows specified by size argument
-#fetchall() – for all rows in db
 GET_STORAGE_LOCATION = "SELECT storage_location FROM my_table;"
 def get_storage_location(conn):
    with conn:
-      cursor = conn.execute(GET_STORAGE_LOCATION).fetchmany(10)
-      conn.commit
+      cursor = conn.execute(GET_STORAGE_LOCATION).fetchall()
       for row in cursor:
          print(row)
 
@@ -125,32 +176,8 @@ def get_all_item_instances():
 
 get_all_item_instances()
 
-# VISUALIZING DATA USING MATPLOTLIB
-print("*******************************")
-
-df = pd.read_sql_query("SELECT id, item_name, quantity, purchase_location, Date FROM my_table ORDER BY Date DESC", conn)
-df["Date"] = pd.to_datetime(df["Date"])
-
-#Group products by location they were bought
-df.groupby("purchase_location")["item_name"].nunique().plot(kind="bar", color = "pink")
-plt.ylabel("Item quantity")
-plt.show()
-
-# Visualization Consumption of product by month for item id 1 (Mehl Typ 405 25 kg)
-ypoints = np.array([40, 5, 30, 15, 30, 12, 30, 8, 30, 5, 30, 8, 35])
-plt.plot(ypoints, "o:m", ls = ":")
-plt.xlabel("Bi-monthly inventory from 01/12/2022 to 01/06/2023")
-plt.ylabel("Quantity of item (Flour Type 405 25 kg)")
-plt.show()
-
- # Visualization Consumption of product by month for item id 5 (Butter (250g*20/box)
-ypoints = np.array([10, 2, 7, 5, 8, 5, 8, 5, 10, 3, 10, 5, 10])
-plt.plot(ypoints, "o:g", ls = ":")
-plt.xlabel("Bi-monthly inventory from 01/12/2022 to 01/06/2023")
-plt.ylabel("Quantity of item (Butter (250g*20/box)")
-plt.show()
-
-print("*************************")
+#Seperate code in terminal
+print("***************************")
 
 while(x):
    print("Press 1 to show all products in inventory")
